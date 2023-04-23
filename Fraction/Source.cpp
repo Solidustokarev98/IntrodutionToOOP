@@ -1,11 +1,11 @@
-#include<iostream>
+п»ї#include<iostream>
 using namespace std;
 
 class Fraction
 {
-	int integer;		//Целое число
-	int numerator;		//Числитель
-	int denominator;	//Знаменатель
+	int integer;		//Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+	int numerator;		//Р§РёСЃР»РёС‚РµР»СЊ
+	int denominator;	//Р—РЅР°РјРµРЅР°С‚РµР»СЊ
 
 	public:
 		int get_integer()const
@@ -140,8 +140,8 @@ Fraction operator*(Fraction left, Fraction right)
 	result.to_proper();
 	return result;*/
 
-	//Прямо в return создавем временный безымянный объект типа Fraction
-	//Временные безымянные объекты существуют в пределах одного выражения, и удаляются из памяти позавершении выражения
+	//РџСЂСЏРјРѕ РІ return СЃРѕР·РґР°РІРµРј РІСЂРµРјРµРЅРЅС‹Р№ Р±РµР·С‹РјСЏРЅРЅС‹Р№ РѕР±СЉРµРєС‚ С‚РёРїР° Fraction
+	//Р’СЂРµРјРµРЅРЅС‹Рµ Р±РµР·С‹РјСЏРЅРЅС‹Рµ РѕР±СЉРµРєС‚С‹ СЃСѓС‰РµСЃС‚РІСѓСЋС‚ РІ РїСЂРµРґРµР»Р°С… РѕРґРЅРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ, Рё СѓРґР°Р»СЏСЋС‚СЃСЏ РёР· РїР°РјСЏС‚Рё РїРѕР·Р°РІРµСЂС€РµРЅРёРё РІС‹СЂР°Р¶РµРЅРёСЏ
 	return Fraction
 	(
 		left.get_numerator() * right.get_numerator(),
