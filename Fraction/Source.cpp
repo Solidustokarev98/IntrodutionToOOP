@@ -1,6 +1,7 @@
-﻿//Не смог пока что перегрузить операторы сравнения
+﻿#define _CRT_SECURE_NO_WARNINGS
 #include<iostream>
 using namespace std;
+#define delimiter "--------------------------------------------------"
 
 class Fraction;
 Fraction operator*(Fraction left, Fraction right);
@@ -50,11 +51,22 @@ class Fraction
 			this->denominator = 1;
 			cout << "DefaultConstruct:\t" << this << endl;
 		}
-		Fraction(int integer)
+		explicit Fraction(int integer)
 		{
 			this->integer = integer;
 			this->numerator = 0;
 			this->denominator = 1;
+			cout << "1ArgConstructor:\t" << this << endl;
+		}
+		
+		Fraction(double decimal)
+		{
+			decimal += 1e-10;
+			this->integer = decimal;			//получаем целую часть десятичной дроби
+			decimal -= integer;					//убираем целую часть из десятичной дроби
+			denominator = 1e9;					//максимально возможный знаменатель: 1e10=1*10^9
+			numerator = decimal * denominator;	//вытаскиваем всю дробную часть в числитель
+			reduce();
 		}
 		Fraction(int numerator, int denominator)
 		{
@@ -74,7 +86,7 @@ class Fraction
 			this->integer = other.integer;
 			this->numerator = other.numerator;
 			this->denominator = other.denominator;
-			cout << "CopyConstructor:" << this << endl;
+			cout << "CopyConstructor:\t" << this << endl;
 		}
 		~Fraction()
 		{
@@ -83,6 +95,13 @@ class Fraction
 		}
 
 		//Operators:
+		Fraction& operator()(int integer, int numerator, int denominator)
+		{
+			set_integer(integer);
+			set_numerator(numerator);
+			set_denominator(denominator);
+			return *this;
+		}
 		Fraction& operator=(const Fraction& other)
 		{
 			this->integer = other.integer;
@@ -111,31 +130,6 @@ class Fraction
 		Fraction& operator-=(const Fraction& other)
 		{
 			return *this = *this-other;
-		}
-		//Операторы сравнения (Нужно доработать)
-		bool operator==(const Fraction& other)
-		{
-			
-		}	
-		bool operator!=(const Fraction& other)
-		{
-			
-		}
-		bool operator>(const Fraction& other)
-		{
-			
-		}	
-		bool operator<(const Fraction& other)
-		{
-			
-		}	
-		bool operator>=(const Fraction& other)
-		{
-			
-		}	
-		bool operator<=(const Fraction& other)
-		{
-			
 		}
 
 		//				Increment/Decrement:
@@ -169,6 +163,18 @@ class Fraction
 			integer--;
 			return old;
 		}
+
+		//Type-cast operators:
+		explicit operator int()
+		{
+			to_proper();
+			return integer;
+		}
+		operator double()
+		{
+			return integer + (double)numerator / denominator;
+		}
+
 
 		//Methods:
 		Fraction& to_improper()
@@ -206,6 +212,7 @@ class Fraction
 			int GCD = more;
 			numerator /= GCD;
 			denominator /= GCD;
+			return *this;
 		}
 
 		void print()const
@@ -279,6 +286,46 @@ Fraction operator-(Fraction left, Fraction right)
 	).to_proper();
 }
 
+bool operator==(Fraction left, Fraction right)
+{
+	left.to_improper();
+	right.to_improper();
+	/*if (left.get_numerator() * right.get_denominator() == right.get_numerator() * left.get_denominator())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}*/
+	return left.get_numerator() * right.get_denominator() == right.get_numerator() * left.get_denominator();
+}
+bool operator!=(const Fraction& left, const Fraction& right) //Повторно используем оператор ==
+{
+	return !(left == right);
+}
+bool operator>(Fraction left, Fraction right)
+{
+	left.to_improper();
+	right.to_improper();
+	return left.get_numerator() * right.get_denominator() > right.get_numerator() * left.get_denominator();
+}
+bool operator<(Fraction left, Fraction right)
+{
+	left.to_improper();
+	right.to_improper();
+	return left.get_numerator() * right.get_denominator() < right.get_numerator() * left.get_denominator();
+}
+bool operator>=(const Fraction& left, const Fraction& right)
+{
+	return !(left < right);
+	//return left>right || left==right;
+}
+bool operator<=(const Fraction& left, const Fraction& right)
+{
+	return !(left > right);
+}
+
 std::ostream& operator<<(std::ostream& os, const Fraction& obj)
 {
 	if (obj.get_integer())os << obj.get_integer();
@@ -293,15 +340,47 @@ std::ostream& operator<<(std::ostream& os, const Fraction& obj)
 }
 std::istream& operator>>(std::istream& is, Fraction& obj)
 {
+	
+#ifdef SIMPLE_INPUT
 	int integer, numerator, denominator;
 	is >> integer >> numerator >> denominator;
+	obj.set_integer(integer);
+	obj.set_numerator(numerator);
+	obj.set_denominator(denominator);
+#endif // SIMPLE_INPUT
+
+	const int SIZE = 256;
+	char buffer[SIZE] = {};
+	//is >> buffer;
+	is.getline(buffer, SIZE);
+
+	int number[3] = {};
+	int n = 0; //количество введенных чисел
+	char delimiters[] = "() /";
+	for (char* pch = strtok(buffer, delimiters); pch; pch = strtok(NULL, delimiters))
+	{
+		number[n++] = atoi(pch);
+	}
+	//for (int i = 0; i < n; i++) cout << number[i] << "\t"; cout << endl;
+	obj = Fraction();
+	switch (n)
+	{
+	case 1: obj.set_integer(number[0]); break;
+	case 2: obj.set_numerator(number[0]); obj.set_denominator(number[1]); break;
+	case 3: obj(number[0],number[1],number[2]); break;
+	}
 	return is;
 }
 
+//#define SIMPLE_INPUT
 //#define CONSTRUCTORS_CHECK
 //#define ARITHMETICAL_CHECK
 //#define INCREMENT_CHECK
-
+//#define ISTREAM_OPERATOR
+//#define TYPE_CONVERSIONS_BASICS
+//#define CONVERSIONS_FROM_OTHER_TO_CLASS
+//#define CONVESION_FROM_CLASS_TO_OTHER
+#define HOME_WORK_1
 void main()
 {
 	setlocale(LC_ALL, "");
@@ -354,7 +433,47 @@ void main()
 		i.print();
 	}
 #endif //  INCREMENT_CHECK
-	Fraction A(2, 3, 4);
 
+#ifdef ISTREAM_OPERATOR
+	//Fraction A(2, 3, 4);
+	//cout << A << endl;
+	//cout << (Fraction(1, 2) != Fraction(5, 10)) << endl;
+	Fraction A;
+	cout << "Введите простую дробь: "; cin >> A;
+	cout << A;
+#endif // ISTREAM_OPERATOR
+
+#ifdef TYPE_CONVERSIONS_BASICS
+	int a = 2;		//No conversions
+	double b = 3;	//Conversions from less to more
+	int c = a + b;	//Conversions from more to less
+	cout << c << endl;
+	int d = 8.3;	//Conversions from more to less with data loss
+	cout << d << endl;
+#endif // TYPE_CONVERSIONS_BASICS
+
+#ifdef CONVERSIONS_FROM_OTHER_TO_CLASS
+	cout << sizeof(Fraction) << endl;
+	Fraction A = (Fraction)5;		//Conversion from 'int' to 'Fraction'
+	cout << delimiter << endl;
+	Fraction B;
+	B = Fraction(8);
+#endif // CONVERSIONS_FROM_OTHER_TO_CLASS
+
+#ifdef CONVESION_FROM_CLASS_TO_OTHER
+	Fraction A(2, 3, 4);
+	//A.to_improper();
 	cout << A << endl;
+
+	int a = (int)A;
+	cout << a << endl;
+
+	double b = A;
+	cout << b << endl;
+#endif // CONVESION_FROM_CLASS_TO_OTHER
+
+#ifdef HOME_WORK_1
+	Fraction A = 2.3;
+	cout << A << endl;
+#endif // HOME_WORK_1	
 }
