@@ -24,30 +24,30 @@ public:
         return str;
     }
     //          Constructors:
-    explicit String(int size = 80)
+    explicit String(int size = 80):size(size),str(new char[size]{})
     {
-        this->size = size;
-        this->str = new char[size] {};
+        //this->size = size;
+        //this->str = new char[size] {};
         cout << "Constructor:\t" << this << endl;
     }
-    String(const char str[])
+    String(const char str[]) :size(strlen(str) + 1), str(new char[size] {})
     {
-        this->size = strlen(str)+1;         //Поскольку класс хранит размер в байтах, +1 нужен для хранения NULL-terminator'a
-        this->str = new char[size] {};      //Выделяем память под строку
+        //this->size = strlen(str)+1;         //Поскольку класс хранит размер в байтах, +1 нужен для хранения NULL-terminator'a
+        //this->str = new char[size] {};      //Выделяем память под строку
         for (int i = 0; i < size; i++)this->str[i] = str[i];
         cout << "Constructor:\t" << this << endl;
     }
-    String(const String& other)
+    String(const String& other) :size(other.size), str(new char[size] {})
     {
-        this->size = other.size;
-        this->str = new char[size] {};
+        //this->size = other.size;
+        //this->str = new char[size] {};
         for (int i = 0; i < size; i++)this->str[i] = other.str[i];
         cout << "CopyConstructor:\t" << this << endl;
     }
-    String(String&& other)
+    String(String&& other) :size(other.size), str(other.str)
     {
-        this->size = other.size;
-        this->str = other.str;
+        //this->size = other.size;
+        //this->str = other.str;
         other.size = 0;
         other.str = nullptr;
         cout << "MoveConstructor:\t" << this << endl;
@@ -65,6 +65,7 @@ public:
     }
     String& operator=(const String& other)
     {
+        if (this == &other)return *this;
         delete[] str;
         this->size = other.size;
         this->str = new char[size] {};
@@ -107,6 +108,7 @@ std::ostream& operator<<(std::ostream& os, const String& obj)
     return os<<obj.get_str();      
 }
 #define HOME_WORK
+//#define CONSTRUCTORS_CALLING
 
 void main()
 {
@@ -127,4 +129,33 @@ void main()
     str1 += str2;
     cout << str1 << endl;
 #endif // HOME_WORK    
+#ifdef CONSTRUCTORS_CALLING
+    String str1;
+    str1.print();
+    
+    String str2(22);    //Single-Argument constructor 'int'
+    str2.print();
+
+    String str3="Hello";    //Single-Argument constructor 'const char*'
+    str3.print();
+
+    String str4();   /*Default constructor НЕВОЗМОЖНО вызвать таким образом.
+    В этой строке объявляется функция str4, которая ничегоне принимает,
+    и возвращает объект класса String*/
+    //str4.print();
+    //Если нужно вызвать конструктор по умолчанию, то это можно сделать таке
+    String str5{}; //Default constructor
+    str5.print();
+    
+    String str6{"World"};
+    str6.print();
+
+    String str7=str3;   //CopyConstructor
+    str7.print();
+
+    String str8;   //CopyAssignment
+    str8 = str6;
+    str8.print();
+#endif // CONSTRUCTORS_CALLING
+    
 }
