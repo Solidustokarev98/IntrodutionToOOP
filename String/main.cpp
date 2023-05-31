@@ -46,6 +46,7 @@ public:
     }
     String(String&& other) :size(other.size), str(other.str)
     {
+        //Shallow copy:
         //this->size = other.size;
         //this->str = other.str;
         other.size = 0;
@@ -130,7 +131,7 @@ void main()
     cout << str1 << endl;
 #endif // HOME_WORK    
 #ifdef CONSTRUCTORS_CALLING
-    String str1;
+    String str1; //Default constructor
     str1.print();
     
     String str2(22);    //Single-Argument constructor 'int'
