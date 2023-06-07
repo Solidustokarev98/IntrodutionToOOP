@@ -5,7 +5,7 @@ class Matrix
 {
     int ROWS;
     int COLS;
-    int* mat;
+    int** mat;
 public:
     int get_ROWS()const
     {
@@ -15,32 +15,62 @@ public:
     {
         return COLS;
     }
-    const int* get_mat()const
+    int get_mat(int i,int j)const
     {
-        return mat;
+        if (ROWS > 0 && COLS > 0) return *this->mat[i, j];
+        else
+            return 0;
     }
-    int* get_mat()
+     void set_ROWS(int ROWS)
     {
-        return mat;
+         this->ROWS = ROWS;
+    } 
+    void set_COLS(int COLS)
+    {
+        this->COLS = COLS;
     }
-
-    Matrix(int ROWS=8, int COLS=7)
+    void set_mat(int i, int j)
+    {
+        if ((i < 0) || (i >= ROWS)) return;
+        if ((j < 0) || (j >= ROWS)) return;
+        this->mat[i][j] = mat[i][j];
+    }
+    Matrix()
+    {
+        this->ROWS = 0;
+        this->COLS = 0;
+        this->mat = nullptr;
+        cout<<"DefaultConstructor:\t"<<this<<endl;
+    }
+    Matrix(int ROWS, int COLS)
     {
         this->ROWS = ROWS;
         this->COLS = COLS;
-        this->mat = new int[ROWS*COLS] {};
-        cout<<"Constructor:\t"<<this<<endl;
-    }
-    Matrix(const Matrix& mat)
-    {
-        this->ROWS = ROWS;
-        this->COLS = COLS;
-        this->mat = new int[ROWS*COLS]{};
-        for (int i = 0; i < ROWS * COLS; i++)
+        mat = (int**) new int*[ROWS];
+        for (int i = 0; i < ROWS; i++) mat[i] = (int*)new int[COLS];
+        for (int i = 0; i < ROWS; i++)
         {
-            this->mat[i] = mat[i];          
+            for (int j = 0; j < COLS; j++)
+            {
+                mat[i][j] = 0;
+            }
         }
         cout << "Constructor:\t" << this << endl;
+    }    
+    Matrix(const Matrix& other)
+    {
+        this->ROWS = other.ROWS;
+        this->COLS = other.COLS;
+        mat = (int**) new int* [ROWS];
+        for (int i = 0; i < ROWS; i++) mat[i] = (int*)new int[COLS];
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                mat[i][j] = other.mat[i][j];
+            }
+        }
+        cout << "CopyConstructor:\t" << this << endl;
     }
     ~Matrix()
     {
@@ -52,7 +82,15 @@ public:
     {
         cout << "ROWS: " << ROWS << endl;
         cout << "COLS: " << COLS << endl;
-        cout << "Mat: " << mat <<"\t"<< endl;
+        for (int i = 0; i < ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                cout<<mat[i][j]<<"\t";
+                
+            }
+            cout << endl;
+        }
     }
 };
 /*
@@ -77,6 +115,6 @@ Matrix operator/(Matrix left, Matrix right)
 void main()
 {
     setlocale(LC_ALL, "");
-    Matrix mat;
+    Matrix mat(6,6);
     mat.print();
 }
